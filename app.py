@@ -9,6 +9,7 @@ import json
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'DeNt24@CkOvWnAs'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
@@ -50,7 +51,7 @@ def agent_dashboard():
     # Render the agent dashboard template
     return render_template('agent_dashboard.html')
 
-@app.post("/predict")
+@app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json() or {}
     text = data.get("message", "")
