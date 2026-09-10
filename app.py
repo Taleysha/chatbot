@@ -1,4 +1,3 @@
-import flasktdsfhj
 from flask import Flask, render_template, request, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -36,7 +35,7 @@ model.eval()
 with open('intents.json', 'r', encoding='utf-8') as file:
     intents = json.load(file)
 
-@app.get("/")
+@app.route('/', methods=['GET'])
 def index_get():
     return render_template("base.html")
 
@@ -46,13 +45,15 @@ def login():
     return render_template('agent_login.html')
 
 @app.route('/agent/dashboard')
+@login_required
 def agent_dashboard():
     # Render the agent dashboard template
     return render_template('agent_dashboard.html')
 
 @app.post("/predict")
 def predict():
-    text = request.get_json().get("message")
+    data = request.get_json() or {}
+    text = data.get("message", "")
     
     # Tokenize input text
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
@@ -69,8 +70,8 @@ def predict():
         response = "Thank you for your message. I'll get back to you shortly."
 
     # Check if the response is predefined in intents
-    for intent in intents['intents']:
-        if response in intent['responses']:
+    for intent in intents.get('intents', []):
+        if response in intent.get('responses', []):
             response = intent['responses'][0]
             break
     
